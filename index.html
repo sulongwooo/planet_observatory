@@ -1274,6 +1274,7 @@
 
     function choose(key) {
       if (key === current) return;
+      const prevKey = current;   // 记录当前天体，用于离开动画
       current = key;
       
       const departing = $('departing-carrier');
@@ -1304,11 +1305,11 @@
         archive.classList.remove('switching');
       }, 160);
 
-      exitDraw.set(key);
+      exitDraw.set(prevKey);   // 离开动画保留旧天体，避免与新天体叠加成残影
       departing.className = 'planet-carrier departing-carrier';
       void departing.offsetWidth;
-      departing.classList.toggle('has-ring', current === 'saturn');
-      departing.classList.toggle('is-sun', current === 'sun');
+      departing.classList.toggle('has-ring', prevKey === 'saturn');
+      departing.classList.toggle('is-sun', prevKey === 'sun');
       departing.classList.add('shrink-out');
 
       carrier.className = 'planet-carrier';
