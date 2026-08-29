@@ -1387,16 +1387,30 @@
     initVisitorCounter();
 
     // 页面加载完成后后台预加载全部天体纹理，切换星球时无需等待下载
+    // 采用空闲调度 + 低优先级 + 逐个间隔加载，避免抢占首屏带宽
     function preloadAllTextures() {
-      const urls = new Set();
-      Object.values(planetTextures).forEach(u => urls.add(u));
-      Object.values(planetNightTextures).forEach(u => urls.add(u));
-      urls.forEach(u => { const img = new Image(); img.src = u; });
+      const queue = Array.from(new Set([
+        ...Object.values(planetTextures),
+        ...Object.values(planetNightTextures)
+      ]));
+
+      const step = () => {
+        const url = queue.shift();
+        if (!url) return;
+        const img = new Image();
+        try { img.fetchPriority = 'low'; } catch (e) {}
+        img.decoding = 'async';
+        img.src = url;
+        setTimeout(step, 160); // 每张间隔 160ms，逐个排队下载
+      };
+
+      const start = window.requestIdleCallback || ((cb) => setTimeout(cb, 600));
+      start(step);
     }
     if (document.readyState === 'complete') {
-      setTimeout(preloadAllTextures, 400);
+      preloadAllTextures();
     } else {
-      window.addEventListener('load', () => setTimeout(preloadAllTextures, 400));
+      window.addEventListener('load', preloadAllTextures);
     }
 
     $('lang-btn').addEventListener('click', () => {
