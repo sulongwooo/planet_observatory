@@ -1,0 +1,1394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Immersive Children's Space Planet Observatory" />
+  <title>DEEP SPACE OBSERVATORY</title>
+  <style>
+    :root { 
+      --paper:#eef5ff; --muted:#a3b1cb; --night:#02050f; --deep:#070d2a; 
+      --line:rgba(184,207,255,.16); --blue:#8ecbff; --gold:#ffd36b; 
+      --ring-url: transparent;
+      --ambient-glow: rgba(39, 135, 206, 0.18);
+      --ambient-core: rgba(14, 32, 80, 0.42);
+    }
+    * { box-sizing:border-box; } 
+    html,body { 
+      margin:0; 
+      width:100%;
+      min-width:320px; 
+      background:var(--night); 
+      color:var(--paper); 
+      font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif; 
+      overflow-x:hidden !important; 
+    } 
+    button { font:inherit; cursor:pointer; }
+    
+    .experience { 
+      min-height:100vh; 
+      width:100%;
+      overflow-x:hidden !important; 
+      position:relative; 
+      isolation:isolate; 
+      background: #02050f;
+    }
+
+    /* 全新特写模式：自适应深空光晕与自然微星背景 */
+    .focus-space-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background: 
+        radial-gradient(circle at 72% 44%, var(--ambient-glow) 0%, var(--ambient-core) 35%, transparent 68%),
+        radial-gradient(circle at 20% 75%, rgba(18, 12, 40, 0.35) 0%, transparent 55%),
+        #02050f;
+      transition: background 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .focus-space-backdrop::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.45;
+      background-image: 
+        radial-gradient(circle, #ffffff 0 0.8px, transparent 1.2px),
+        radial-gradient(circle, #8bc34a 0 0.5px, transparent 1.2px),
+        radial-gradient(circle, #90caf9 0 0.9px, transparent 1.4px);
+      background-size: 140px 140px, 230px 230px, 320px 320px;
+      background-position: 25px 40px, 90px 150px, 190px 80px;
+    }
+
+    /* 全景模式专属程序化深空星辰背景画布 */
+    .orrery-bg-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .experience.is-orrery .orrery-bg-canvas { opacity: 1; }
+    .experience.is-orrery .focus-space-backdrop { opacity: 0; }
+    
+    .wrap { width:min(1390px, calc(100% - 72px)); margin:auto; }
+    .topbar { height:86px; display:flex; align-items:center; justify-content:space-between; position:relative; z-index:20; }
+    
+    .brand-group { display:flex; align-items:center; gap:16px; }
+    .brand { display:flex; align-items:center; gap:12px; color:#fff; text-decoration:none; font-weight:800; letter-spacing:.06em; }
+    .brand-mark { width:31px; height:31px; border:2px solid #ffd872; border-radius:50%; position:relative; box-shadow:0 0 18px rgba(255,204,103,.3); }
+    .brand-mark::after { content:""; position:absolute; width:44px; height:14px; border:1px solid #a8c6ff; border-radius:50%; top:6px; left:-8px; transform:rotate(-18deg); }
+    
+    /* 访客计数徽章 */
+    .visitor-badge {
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:4px 11px;
+      background:rgba(142, 203, 255, 0.08);
+      border:1px solid rgba(142, 203, 255, 0.22);
+      border-radius:99px;
+      font-size:11px;
+      color:#b2d5ff;
+      letter-spacing:0.04em;
+      user-select:none;
+      transition: all 0.3s ease;
+    }
+    .visitor-badge:hover {
+      background:rgba(142, 203, 255, 0.16);
+      border-color:rgba(142, 203, 255, 0.45);
+      color:#fff;
+    }
+    .visitor-dot {
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:#63e6be;
+      box-shadow:0 0 8px #63e6be;
+      animation:pulse-dot 2.5s infinite ease-in-out;
+    }
+    .visitor-badge b {
+      color:#ffd36b;
+      font-weight:800;
+      font-feature-settings: "tnum";
+      font-variant-numeric: tabular-nums;
+    }
+    @keyframes pulse-dot { 0%,100%{opacity:1; transform:scale(1);} 50%{opacity:0.4; transform:scale(0.7);} }
+
+    .top-controls { display:flex; align-items:center; gap:14px; }
+    
+    /* 视图切换按钮 */
+    .view-toggle {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(184,207,255,0.3);
+      border-radius:99px;
+      padding:6px 15px;
+      font-size:12px;
+      font-weight:700;
+      color:#fff;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+    .view-toggle:hover { background:rgba(255,255,255,0.18); border-color:var(--gold); }
+    .view-toggle .view-icon-wrap { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      color: var(--gold);
+    }
+    .view-toggle .view-icon-wrap svg {
+      width: 100%;
+      height: 100%;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .view-toggle kbd { font-size:9px; background:rgba(0,0,0,0.35); padding:2px 5px; border-radius:4px; opacity:0.8; margin-left:3px; font-family:inherit; }
+
+    /* 语言切换按钮 */
+    .lang-toggle { 
+      display:inline-flex; 
+      align-items:center; 
+      background:rgba(255,255,255,0.06); 
+      border:1px solid rgba(184,207,255,0.25); 
+      border-radius:99px; 
+      padding:3px 5px; 
+      font-size:11px; 
+      font-weight:700; 
+      color:#9fb6e0; 
+      transition: all 0.3s ease; 
+      user-select: none;
+    }
+    .lang-toggle:hover { border-color:var(--gold); color:#fff; background:rgba(255,255,255,0.12); }
+    .lang-toggle span { padding:2px 7px; border-radius:99px; transition: all 0.25s ease; }
+    .lang-toggle span.active { background:var(--gold); color:#080e2b; box-shadow:0 0 10px rgba(255,211,107,0.4); }
+
+    .scene { min-height:calc(100vh - 86px); display:grid; grid-template-columns:minmax(310px,.75fr) minmax(510px,1.25fr); align-items:center; gap:4vw; padding:30px 0 146px; position:relative; }
+    
+    /* 左侧文字面板 */
+    .archive { 
+      align-self:center; 
+      position:relative; 
+      z-index:3; 
+      transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .archive.switching { opacity: 0.15; transform: translateY(4px); }
+    .archive-label { color:#9abaff; font-size:11px; letter-spacing:.19em; font-weight:800; }
+    .archive-label::before { content:""; display:inline-block; width:26px; height:1px; margin:0 9px 4px 0; background:#8ab5ff; }
+    .planet-title { max-width:500px; margin:18px 0 16px; font-size:clamp(52px,6vw,91px); line-height:.92; letter-spacing:-.085em; }
+    .planet-title span { display:block; margin:18px 0 0; color:#93bfff; font-size:13px; letter-spacing:.18em; }
+    .planet-description { max-width:380px; margin:0; color:#c0cce4; font-size:15px; line-height:1.9; }
+    .parameters { width:min(100%,430px); display:grid; grid-template-columns:repeat(2,1fr); gap:0 30px; margin:33px 0 24px; border-top:1px solid var(--line); }
+    .parameter { padding:14px 0 12px; border-bottom:1px solid var(--line); }
+    .parameter span { display:block; color:#96a4c2; font-size:11px; letter-spacing:.07em; }
+    .parameter b { display:block; margin-top:6px; color:#fff; font-size:15px; font-weight:700; }
+    .archive-note { display:flex; align-items:center; gap:9px; color:#f7d783; font-size:12px; }
+    .archive-note i { width:8px; height:8px; border-radius:50%; background:#f7d783; box-shadow:0 0 12px #f7d783; }
+    
+    /* 观测窗口 */
+    .space-window { 
+      height:min(650px,67vh); 
+      min-height:490px; 
+      position:relative; 
+      display:grid; 
+      place-items:center; 
+    }
+    .coords { position:absolute; z-index:3; color:#aebfe7; font-size:10px; letter-spacing:.08em; pointer-events:none; }
+    .coords.one { left:5%; top:18%; }
+    .coords.two { right:3%; bottom:24%; }
+    .coords i { display:inline-block; width:5px; height:5px; margin-right:6px; border-radius:50%; background:#ffda73; box-shadow:0 0 10px #ffda73; }
+    
+    /* 星球载体容器 */
+    .planet-carrier { 
+      width:clamp(370px,42vw,610px); 
+      height:clamp(370px,42vw,610px); 
+      position:relative; 
+      z-index:2; 
+      display:grid; 
+      place-items:center; 
+      filter:drop-shadow(0 35px 65px rgba(0,0,0,.6)); 
+    }
+    .planet-carrier::before { 
+      content:""; 
+      position:absolute; 
+      width:108%; 
+      height:108%; 
+      border-radius:50%; 
+      background:radial-gradient(circle,rgba(116,170,255,.22),rgba(63,83,231,.08) 50%,transparent 72%); 
+      animation:pulse 5s ease-in-out infinite; 
+    }
+    .planet-carrier.is-sun::before {
+      background: radial-gradient(circle, rgba(255, 180, 50, 0.45), rgba(255, 100, 20, 0.18) 55%, transparent 75%);
+    }
+
+    /* 土星环图层 */
+    .saturn-ring-back, .saturn-ring-front {
+      position: absolute;
+      width: 175%;
+      height: 175%;
+      top: 50%;
+      left: 50%;
+      pointer-events: none;
+      background-image: var(--ring-url);
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      display: none;
+      transition: opacity 0.5s ease;
+    }
+    .has-ring .saturn-ring-back {
+      display: block;
+      z-index: 1;
+      transform: translate(-50%, -50%) rotate(-18deg) rotateX(72deg);
+      clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+    }
+    .has-ring .saturn-ring-front {
+      display: block;
+      z-index: 3;
+      transform: translate(-50%, -50%) rotate(-18deg) rotateX(72deg);
+      clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+      filter: drop-shadow(0 15px 15px rgba(0,0,0,0.5));
+    }
+    
+    /* 渐入渐出平滑动画 */
+    .planet-carrier.focus-in { animation: planet-focus-in 0.78s cubic-bezier(0.14, 1, 0.34, 1) both; }
+    .departing-carrier { position:absolute; z-index:1; opacity:0; pointer-events:none; }
+    .departing-carrier.shrink-out { animation: planet-shrink-out 0.38s cubic-bezier(0.4, 0, 1, 1) both; }
+    
+    @keyframes planet-focus-in {
+      0% { opacity: 0; transform: scale(0.4); filter: brightness(1.28) blur(6px); }
+      70% { transform: scale(1.03); filter: brightness(1.08) blur(0px); }
+      100% { opacity: 1; transform: scale(1); filter: brightness(1) blur(0px); }
+    }
+    @keyframes planet-shrink-out {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.65); }
+    }
+
+    .planet-hit { width:100%; height:100%; border:0; border-radius:50%; padding:0; position:relative; z-index:2; background:transparent; }
+    .planet-canvas { width:100%; height:100%; display:block; border-radius:50%; touch-action:none; cursor:grab; }
+    .planet-canvas:active { cursor:grabbing; }
+    
+    /* 底部选择器 */
+    .selector { 
+      position:absolute; 
+      z-index:7; 
+      left:50%; 
+      bottom:26px; 
+      transform:translateX(-50%); 
+      width:min(1390px, calc(100% - 72px)); 
+      display:flex; 
+      align-items:center; 
+      gap:20px; 
+      padding:14px 0; 
+      border-top:1px solid var(--line); 
+      border-bottom:1px solid var(--line); 
+      transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.35s;
+    }
+    .selector.hide-in-orrery {
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, 35px);
+      pointer-events: none;
+    }
+
+    .selector-caption { flex:0 0 110px; color:#cbd8f4; font-size:12px; line-height:1.5; letter-spacing:0.04em; }
+    .selector-caption b { color:#fff; font-weight:700; font-size:13px; }
+    .planet-list { min-width:0; flex:1; display:flex; justify-content:space-between; gap:2px; overflow-x:auto; scrollbar-width:none; }
+    .planet-list::-webkit-scrollbar { display:none; }
+    .planet-select { flex:0 0 54px; border:0; padding:6px 1px; background:transparent; color:#8190b0; transition: color 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); position:relative; }
+    .planet-select::after { content:""; position:absolute; left:10%; right:10%; height:2px; bottom:0; transform:scaleX(0); background:#f5d06b; transition:transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+    .planet-select:hover { color:#dfe9ff; }
+    .planet-select.active { color:#fff; transform:translateY(-4px); }
+    .planet-select.active::after { transform:scaleX(1); }
+    .planet-select:focus-visible,.planet-hit:focus-visible { outline:2px solid var(--gold); outline-offset:4px; }
+    
+    .select-orb { --orb:#5799db; display:block; width:20px; height:20px; margin:0 auto 4px; border-radius:50%; background:var(--orb); box-shadow:inset -4px -3px 4px rgba(0,0,0,.35),0 0 10px color-mix(in srgb,var(--orb) 55%,transparent); transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+    .planet-select:hover .select-orb { transform: scale(1.08); }
+    .planet-select.active .select-orb { transform: scale(1.16); }
+    .planet-select span { font-size:10px; font-weight:700; display:block; text-align:center; }
+    
+    /* 15 颗天体专属色彩 */
+    .planet-select[data-key="sun"] .select-orb { --orb:#ff8822; }
+    .planet-select[data-key="mercury"] .select-orb { --orb:#a2a39e; }
+    .planet-select[data-key="venus"] .select-orb { --orb:#e0a764; }
+    .planet-select[data-key="earth"] .select-orb { --orb:#2787ce; }
+    .planet-select[data-key="moon"] .select-orb { --orb:#c8ccd4; }
+    .planet-select[data-key="mars"] .select-orb { --orb:#c7644d; }
+    .planet-select[data-key="ceres"] .select-orb { --orb:#828792; }
+    .planet-select[data-key="jupiter"] .select-orb { --orb:#c38562; }
+    .planet-select[data-key="saturn"] .select-orb { --orb:#d3b168; }
+    .planet-select[data-key="uranus"] .select-orb { --orb:#7ad0d0; }
+    .planet-select[data-key="neptune"] .select-orb { --orb:#4165c9; }
+    .planet-select[data-key="pluto"] .select-orb { --orb:#c5a892; }
+    .planet-select[data-key="makemake"] .select-orb { --orb:#bf6a4b; }
+    .planet-select[data-key="haumea"] .select-orb { --orb:#b2c5d8; }
+    .planet-select[data-key="eris"] .select-orb { --orb:#d2d6db; }
+
+    /* 全景星系视图 (Solar Orrery) */
+    .orrery-view {
+      position: absolute;
+      inset: 86px 0 0 0;
+      z-index: 10;
+      display: none;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .orrery-view.active {
+      display: block;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .orrery-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+      touch-action: none;
+    }
+    .orrery-canvas:active { cursor: grabbing; }
+
+    .orrery-hud {
+      position: absolute;
+      left: 36px;
+      bottom: 36px;
+      z-index: 12;
+      pointer-events: none;
+      max-width: 480px;
+    }
+    .orrery-hud-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(255,211,107,0.15);
+      border: 1px solid rgba(255,211,107,0.4);
+      color: var(--gold);
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: 0.08em;
+    }
+    .orrery-hud-title { font-size: 26px; font-weight: 800; margin: 0 0 6px; color: #fff; }
+    .orrery-hud-desc { margin: 0; color: #a9badc; font-size: 13px; line-height: 1.6; }
+
+    .toast { position:absolute; z-index:30; top:100px; left:50%; transform:translate(-50%,-15px); padding:10px 15px; border:1px solid rgba(255,219,126,.42); border-radius:99px; color:#fff5c9; background:rgba(29,25,68,.84); opacity:0; pointer-events:none; font-size:13px; transition:.3s; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    @keyframes pulse { 50% { transform:scale(1.08); opacity:.78; } }
+    
+    @media (max-width:900px) { 
+      .wrap { width:min(100% - 44px, 1390px); } 
+      .scene { grid-template-columns:1fr; gap:0; padding-top:16px; padding-bottom:150px; } 
+      .archive { max-width:600px; } 
+      .planet-title { font-size:62px; } 
+      .space-window { height:500px; min-height:0; margin-top:-20px; } 
+      .selector { width:calc(100% - 44px); gap:12px; bottom:20px; } 
+      .selector-caption { display:none; } 
+      .planet-list { justify-content:flex-start; } 
+      .planet-select { flex:0 0 52px; } 
+      .orrery-hud { left: 20px; bottom: 20px; }
+      .orrery-hud-title { font-size: 20px; }
+      .visitor-badge { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="experience" id="experience">
+    <!-- 特写自适应深空光晕背景 -->
+    <div class="focus-space-backdrop" id="focus-backdrop" aria-hidden="true"></div>
+
+    <!-- 全景模式程序化深空星空 Canvas -->
+    <canvas class="orrery-bg-canvas" id="orrery-bg-canvas"></canvas>
+
+    <header class="wrap topbar">
+      <div class="brand-group">
+        <a class="brand" href="#experience">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span id="brand-title">DEEP SPACE OBSERVATORY</span>
+        </a>
+        <div class="visitor-badge" id="visitor-badge" title="Real-time Explorers Count">
+          <span class="visitor-dot"></span>
+          <span id="visitor-label">EXPLORERS:</span>
+          <b id="visitor-count">12,842</b>
+        </div>
+      </div>
+
+      <div class="top-controls">
+        <button class="view-toggle" id="view-mode-btn" type="button" aria-label="Toggle View Mode (Shortcut: Space)">
+          <span class="view-icon-wrap" id="view-icon-wrap">
+            <svg viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-15 12 12)"></ellipse>
+              <circle cx="12" cy="12" r="3.2" fill="currentColor"></circle>
+              <circle cx="18.5" cy="9.5" r="1.6" fill="currentColor"></circle>
+            </svg>
+          </span>
+          <span id="view-text">Solar Orrery</span>
+          <kbd>Space</kbd>
+        </button>
+        <button class="lang-toggle" id="lang-btn" type="button" aria-label="Switch Language (Shortcut: T)">
+          <span id="lang-zh">ZH</span>/<span class="active" id="lang-en">EN</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 单星特写观测视图 -->
+    <div class="wrap scene" id="focus-scene">
+      <section class="archive" id="archive-section" aria-labelledby="planet-name">
+        <div class="archive-label" id="archive-label">ORBITAL ARCHIVE 04 / 15</div>
+        <h1 class="planet-title" id="planet-name">Earth<span id="planet-subtitle">THE BLUE PLANET</span></h1>
+        <p class="planet-description" id="planet-description">A vibrant blue marble suspended in dark space. Vast oceans, atmosphere, and life make it our unique home.</p>
+        <div class="parameters">
+          <div class="parameter"><span id="p1-label">Sun Position</span><b id="p1-value">3rd Planet</b></div>
+          <div class="parameter"><span id="p2-label">Orbital Period</span><b id="p2-value">365 Days</b></div>
+          <div class="parameter"><span id="p3-label">Diameter</span><b id="p3-value">~12,742 km</b></div>
+          <div class="parameter"><span id="p4-label">Observation</span><b id="p4-value">Known to Host Life</b></div>
+        </div>
+        <div class="archive-note"><i></i><span id="archive-note">Click on the 3D globe to hear a little secret.</span></div>
+      </section>
+      <section class="space-window" aria-label="3D Planet Observatory">
+        <span class="coords one"><i></i><span id="viewpoint-text">VIEWPOINT 42.6°</span></span>
+        <span class="coords two"><span id="range-label">RANGE · </span><b id="range-value">12,742 KM</b></span>
+        
+        <div class="planet-carrier departing-carrier" id="departing-carrier" aria-hidden="true">
+          <div class="saturn-ring-back"></div>
+          <canvas class="planet-canvas" id="departing-canvas"></canvas>
+          <div class="saturn-ring-front"></div>
+        </div>
+        
+        <div class="planet-carrier focus-in" id="planet-carrier">
+          <div class="saturn-ring-back"></div>
+          <button class="planet-hit" id="planet-hit" type="button" aria-label="Earth 3D Model, click to listen">
+            <canvas class="planet-canvas" id="planet-canvas" aria-label="Interactive 3D Earth Globe"></canvas>
+          </button>
+          <div class="saturn-ring-front"></div>
+        </div>
+      </section>
+    </div>
+    
+    <!-- 全景星系沙盒视图 (Solar System Orrery) -->
+    <section class="orrery-view" id="orrery-scene" aria-label="Solar System 3D Map">
+      <canvas class="orrery-canvas" id="orrery-canvas"></canvas>
+      <div class="orrery-hud">
+        <span class="orrery-hud-badge" id="orrery-hud-badge">SOLAR SYSTEM PANORAMA</span>
+        <h2 class="orrery-hud-title" id="orrery-hud-title">Heliosphere & Planetary Orbits</h2>
+        <p class="orrery-hud-desc" id="orrery-hud-desc">Drag to rotate the orbital plane. Click on any planet to focus and inspect its geological archive.</p>
+      </div>
+    </section>
+
+    <!-- 底部天体选择器 -->
+    <nav class="selector" id="bottom-selector" aria-label="Celestial Selector">
+      <div class="selector-caption"><span id="caption-line1">CRUISE TARGET</span><br><b id="caption-line2">CLICK TO OBSERVE</b></div>
+      <div class="planet-list" id="planet-list">
+        <button class="planet-select" data-key="sun" type="button"><i class="select-orb"></i><span>Sun</span></button>
+        <button class="planet-select" data-key="mercury" type="button"><i class="select-orb"></i><span>Mercury</span></button>
+        <button class="planet-select" data-key="venus" type="button"><i class="select-orb"></i><span>Venus</span></button>
+        <button class="planet-select active" data-key="earth" type="button" aria-pressed="true"><i class="select-orb"></i><span>Earth</span></button>
+        <button class="planet-select" data-key="moon" type="button"><i class="select-orb"></i><span>Moon</span></button>
+        <button class="planet-select" data-key="mars" type="button"><i class="select-orb"></i><span>Mars</span></button>
+        <button class="planet-select" data-key="ceres" type="button"><i class="select-orb"></i><span>Ceres</span></button>
+        <button class="planet-select" data-key="jupiter" type="button"><i class="select-orb"></i><span>Jupiter</span></button>
+        <button class="planet-select" data-key="saturn" type="button"><i class="select-orb"></i><span>Saturn</span></button>
+        <button class="planet-select" data-key="uranus" type="button"><i class="select-orb"></i><span>Uranus</span></button>
+        <button class="planet-select" data-key="neptune" type="button"><i class="select-orb"></i><span>Neptune</span></button>
+        <button class="planet-select" data-key="pluto" type="button"><i class="select-orb"></i><span>Pluto</span></button>
+        <button class="planet-select" data-key="makemake" type="button"><i class="select-orb"></i><span>Makemake</span></button>
+        <button class="planet-select" data-key="haumea" type="button"><i class="select-orb"></i><span>Haumea</span></button>
+        <button class="planet-select" data-key="eris" type="button"><i class="select-orb"></i><span>Eris</span></button>
+      </div>
+    </nav>
+    <div class="toast" id="toast" role="status"></div>
+  </main>
+  <script>
+    let currentLang = 'en';
+    let currentMode = 'focus';
+    let visitorNumber = 12842;
+    const planetOrder = ['sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'ceres', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'makemake', 'haumea', 'eris'];
+
+    // 15 颗天体专属自适应深空环境光色
+    const planetAmbientColors = {
+      sun:      { glow: 'rgba(255, 120, 20, 0.32)', core: 'rgba(180, 50, 0, 0.48)' },
+      mercury:  { glow: 'rgba(162, 163, 158, 0.16)', core: 'rgba(45, 48, 55, 0.35)' },
+      venus:    { glow: 'rgba(224, 167, 100, 0.22)', core: 'rgba(95, 55, 20, 0.35)' },
+      earth:    { glow: 'rgba(39, 135, 206, 0.22)',  core: 'rgba(14, 32, 80, 0.42)' },
+      moon:     { glow: 'rgba(200, 204, 212, 0.16)', core: 'rgba(35, 40, 52, 0.35)' },
+      mars:     { glow: 'rgba(199, 100, 77, 0.25)',  core: 'rgba(90, 25, 15, 0.42)' },
+      ceres:    { glow: 'rgba(130, 135, 146, 0.16)', core: 'rgba(35, 38, 45, 0.35)' },
+      jupiter:  { glow: 'rgba(195, 133, 98, 0.22)',  core: 'rgba(85, 42, 20, 0.38)' },
+      saturn:   { glow: 'rgba(211, 177, 104, 0.22)', core: 'rgba(80, 60, 22, 0.38)' },
+      uranus:   { glow: 'rgba(122, 208, 208, 0.22)', core: 'rgba(20, 75, 80, 0.38)' },
+      neptune:  { glow: 'rgba(65, 101, 201, 0.25)',  core: 'rgba(15, 30, 95, 0.42)' },
+      pluto:    { glow: 'rgba(197, 168, 146, 0.16)', core: 'rgba(60, 45, 38, 0.35)' },
+      makemake: { glow: 'rgba(191, 106, 75, 0.2)',   core: 'rgba(75, 30, 18, 0.35)' },
+      haumea:   { glow: 'rgba(178, 197, 216, 0.18)', core: 'rgba(40, 55, 75, 0.35)' },
+      eris:     { glow: 'rgba(210, 214, 219, 0.2)',  core: 'rgba(50, 60, 75, 0.38)' }
+    };
+
+    const svgIcons = {
+      focus: `
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="8"></circle>
+          <line x1="12" y1="2" x2="12" y2="6"></line>
+          <line x1="12" y1="18" x2="12" y2="22"></line>
+          <line x1="2" y1="12" x2="6" y2="12"></line>
+          <line x1="18" y1="12" x2="22" y2="12"></line>
+          <circle cx="12" cy="12" r="2" fill="currentColor"></circle>
+        </svg>
+      `,
+      orrery: `
+        <svg viewBox="0 0 24 24">
+          <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-15 12 12)"></ellipse>
+          <circle cx="12" cy="12" r="3.2" fill="currentColor"></circle>
+          <circle cx="18.5" cy="9.5" r="1.6" fill="currentColor"></circle>
+        </svg>
+      `
+    };
+
+    const i18n = {
+      zh: {
+        brand: '小小宇宙观测站',
+        visitorLabel: '宇航员已抵达:',
+        viewBtnFocus: '特写观测',
+        viewBtnOrrery: '星系全景',
+        archivePrefix: '轨道档案',
+        viewpointPrefix: '视界角',
+        caption1: '星际巡航目标',
+        caption2: '点击对焦观测',
+        range: '测距 · ',
+        orreryBadge: '太阳系三维星图',
+        orreryTitle: '日心引力与行星轨道',
+        orreryDesc: '拖拽可多角度俯瞰太阳系黄道面。点击任意天体可直接对焦放大，进入专属深度档案。',
+        planets: {
+          sun: '太阳', mercury: '水星', venus: '金星', earth: '地球', moon: '月球',
+          mars: '火星', ceres: '谷神星', jupiter: '木星', saturn: '土星',
+          uranus: '天王星', neptune: '海王星', pluto: '冥王星', makemake: '鸟神星',
+          haumea: '妊神星', eris: '阋神星'
+        },
+        records: {
+          sun:{num:'01',name:'太阳',sub:'太阳系恒星中心',desc:'太阳是太阳系的心脏与唯一恒星，巨大的核聚变源源不断地为所有行星提供光与热量。',stats:[['天体分类','黄矮星 / 恒星'],['表面温度','约 5,500 °C'],['直径','约 1,392,700 公里'],['质量占比','占太阳系 99.8%']],note:'装下整个太阳需要大约 130 万个地球！',voice:'我是太阳，我用温暖的光芒照亮并守护着整个太阳系！'},
+          mercury:{num:'02',name:'水星',sub:'飞速公转信使',desc:'离太阳最近的水星像一颗布满陨石坑的灰色石头。它白天很热，夜晚又会变得非常冷。',stats:[['离太阳','第 1 位'],['绕太阳一圈','88 天'],['直径','约 4,879 公里'],['观测标签','最快的行星']],note:'它的一年，比地球上的一个暑假还短。',voice:'我是水星，我总是第一个绕过太阳！'},
+          venus:{num:'03',name:'金星',sub:'金色温室孪生星',desc:'金星的大小和地球很接近，可它厚厚的云层把热量紧紧包住，是一颗热得惊人的邻居。',stats:[['离太阳','第 2 位'],['绕太阳一圈','225 天'],['直径','约 12,104 公里'],['观测标签','夜空最亮']],note:'晚上看见最亮的“星”，常常就是金星。',voice:'我是金星，我的金色云被子厚得不得了！'},
+          earth:{num:'04',name:'地球',sub:'蔚蓝生命家园',desc:'从太空看，地球像一颗漂在黑暗里的蓝玻璃珠。海洋、空气和生命，让它成为我们最特别的家。',stats:[['离太阳','第 3 位'],['绕太阳一圈','365 天'],['直径','约 12,742 公里'],['观测标签','已知有生命']],note:'点击右侧行星，听它讲一个小秘密。',voice:'我是地球，蓝色的海洋让许多生命有了家。'},
+          moon:{num:'05',name:'月球',sub:'地球天然伴侣',desc:'月球是地球唯一的天然卫星，它总是用同一面朝向我们，表面的环形山记录着远古撞击。',stats:[['天体分类','天然卫星'],['绕地球一圈','约 27.3 天'],['直径','约 3,474 公里'],['观测标签','潮汐锁定']],note:'你在夜空看到的明暗阴影，其实是月海与高地。',voice:'我是月球，我每天都在默默陪伴着地球入睡！'},
+          mars:{num:'06',name:'火星',sub:'红色探险边疆',desc:'火星的泥土里含有很多铁，像生锈的自行车一样泛红。机器人正在那里替我们探索远方。',stats:[['离太阳','第 4 位'],['绕太阳一圈','687 天'],['直径','约 6,779 公里'],['观测标签','红色行星']],note:'看看它表面像铁锈一样的红色。',voice:'我是火星。说不定未来，你会来我的红色山谷旅行！'},
+          ceres:{num:'07',name:'谷神星',sub:'小行星带女王',desc:'谷神星是小行星带中最大的天体，虽然个头不大，但它有着球形的身体和闪闪发光的神秘白斑。',stats:[['天体分类','矮行星'],['绕太阳一圈','约 4.6 年'],['直径','约 945 公里'],['所在区域','小行星带']],note:'它就像是太阳系小石块王国里的小女王。',voice:'我是谷神星，我是小行星带里最圆也是最大的天体！'},
+          jupiter:{num:'08',name:'木星',sub:'风暴气态巨行星',desc:'木星是太阳系的巨人，主要由气体组成。它的大红斑，是一个比地球还宽的超级风暴。',stats:[['离太阳','第 5 位'],['绕太阳一圈','约 12 年'],['直径','约 139,820 公里'],['观测标签','最大行星']],note:'寻找木星那块永远在旋转的大红斑。',voice:'我是木星，足足能装下 1,300 多个地球！'},
+          saturn:{num:'09',name:'土星',sub:'绝美冰晶光环星',desc:'土星的光环其实由无数冰粒、岩石和尘埃组成，它们安静地排成一大片发亮的环。',stats:[['离太阳','第 6 位'],['绕太阳一圈','约 29 年'],['直径','约 116,460 公里'],['观测标签','冰粒光环']],note:'它的光环像宇宙里最大的一只呼啦圈。',voice:'我是土星，围着我的不是一条光环，而是千万颗冰粒。'},
+          uranus:{num:'10',name:'天王星',sub:'侧卧自转冰巨星',desc:'天王星像一颗侧躺着滚动的薄荷色弹珠。它的大气里有甲烷，所以看起来蓝绿又冰凉。',stats:[['离太阳','第 7 位'],['绕太阳一圈','约 84 年'],['直径','约 50,724 公里'],['观测标签','侧躺着自转']],note:'它旋转的姿势，是太阳系里最特别的一个。',voice:'我是天王星，我喜欢侧着身子在太空里旅行。'},
+          neptune:{num:'11',name:'海王星',sub:'深蓝极速狂风星',desc:'海王星很远很远，阳光飞到那里要四个多小时。它的深蓝色外衣下，藏着太阳系最快的风。',stats:[['离太阳','第 8 位'],['绕太阳一圈','约 165 年'],['直径','约 49,244 公里'],['观测标签','最快的大风']],note:'这里的风，比高速列车还要快好几倍。',voice:'我是海王星，离太阳最远，但我的风跑得一点也不慢！'},
+          pluto:{num:'12',name:'冥王星',sub:'心形冰原守护者',desc:'冥王星身上有着标志性的“心形冰原”（汤博区）。照片下方黑色的区域，是新视野号飞掠时处于漫长极夜中的真实观测盲区。',stats:[['天体分类','矮行星'],['绕太阳一圈','约 248 年'],['直径','约 2,376 公里'],['观测标签','真实南极极夜盲区']],note:'你知道吗？它南边黑黑的一片是科学家严谨保留的真实极夜盲区哦！',voice:'我是冥王星，虽然我离太阳很远，但我有一颗暖暖的心形冰原！'},
+          makemake:{num:'13',name:'鸟神星',sub:'绯红甲烷冰封界',desc:'鸟神星位于遥远的柯伊伯带，是一颗非常明亮的极寒矮行星，红褐色的冰冻甲烷给它披上了一层外衣。',stats:[['天体分类','矮行星'],['绕太阳一圈','约 305 年'],['直径','约 1,430 公里'],['表面温度','约 -243 °C']],note:'它以复活节岛神话中的创造之神命名。',voice:'我是鸟神星，虽然离太阳非常遥远，但我身上结着闪亮的甲烷冰霜！'},
+          haumea:{num:'14',name:'妊神星',sub:'飞旋冰晶橄榄球',desc:'妊神星是太阳系中自转最快的大型天体，高速旋转让它被拉伸成了奇特的橄榄球形状。',stats:[['天体分类','矮行星'],['自转周期','约 3.9 小时'],['平均直径','约 1,595 公里'],['特征地貌','超快自转 / 冰晶外壳']],note:'它每 4 个小时不到就能转完一整天！',voice:'我是妊神星，我旋转得特别快，像个在太空中飞速滚动的冰橄榄球！'},
+          eris:{num:'15',name:'阋神星',sub:'深空极寒冰雪巨星',desc:'阋神星是柯伊伯带中质量最大的矮行星，它比冥王星更重，终年笼罩在极其洁白而耀眼的冰雪中。',stats:[['天体分类','矮行星'],['绕太阳一圈','约 558 年'],['直径','约 2,326 公里'],['反射率','高达 96%']],note:'阳光到达它那里需要足足 9 个多小时。',voice:'我是阋神星，在太阳系极度寒冷的深空边缘安静漫游！'}
+        }
+      },
+      en: {
+        brand: 'DEEP SPACE OBSERVATORY',
+        visitorLabel: 'EXPLORERS:',
+        viewBtnFocus: 'Focus View',
+        viewBtnOrrery: 'Solar Orrery',
+        archivePrefix: 'ORBITAL ARCHIVE',
+        viewpointPrefix: 'VIEWPOINT',
+        caption1: 'CRUISE TARGET',
+        caption2: 'CLICK TO OBSERVE',
+        range: 'RANGE · ',
+        orreryBadge: 'SOLAR SYSTEM PANORAMA',
+        orreryTitle: 'Heliosphere & Planetary Orbits',
+        orreryDesc: 'Drag to rotate the orbital plane. Click on any planet to focus and inspect its geological archive.',
+        planets: {
+          sun: 'Sun', mercury: 'Mercury', venus: 'Venus', earth: 'Earth', moon: 'Moon',
+          mars: 'Mars', ceres: 'Ceres', jupiter: 'Jupiter', saturn: 'Saturn',
+          uranus: 'Uranus', neptune: 'Neptune', pluto: 'Pluto', makemake: 'Makemake',
+          haumea: 'Haumea', eris: 'Eris'
+        },
+        records: {
+          sun:{num:'01',name:'Sun',sub:'THE SOLAR STAR',desc:'The Sun is the heart and only star of our solar system, constantly supplying energy and heat through nuclear fusion.',stats:[['Classification','Yellow Dwarf / Star'],['Surface Temp','~5,500 °C'],['Diameter','~1,392,700 km'],['Mass Share','99.8% of Solar System']],note:'It takes about 1.3 million Earths to fill the Sun!',voice:'I am the Sun, keeping our entire cosmic neighborhood warm and bright!'},
+          mercury:{num:'02',name:'Mercury',sub:'THE SWIFT MESSENGER',desc:'The closest planet to the Sun, resembling a cratered grey stone. Scorching by day and freezing by night.',stats:[['Sun Position','1st Planet'],['Orbital Period','88 Days'],['Diameter','~4,879 km'],['Observation','Fastest Orbit']],note:'Its whole year is shorter than a summer vacation on Earth.',voice:'I am Mercury, the fastest racer circling the Sun!'},
+          venus:{num:'03',name:'Venus',sub:'THE GOLDEN TWIN',desc:'Similar in size to Earth, but wrapped in bandwidth clouds that make it intensely hot.',stats:[['Sun Position','2nd Planet'],['Orbital Period','225 Days'],['Diameter','~12,104 km'],['Observation','Brightest Night Star']],note:'The brightest "star" in the evening sky is often Venus.',voice:'I am Venus, wrapped under a super-thick golden blanket of clouds!'},
+          earth:{num:'04',name:'Earth',sub:'THE BLUE PLANET',desc:'A vibrant blue marble suspended in dark space. Vast oceans, atmosphere, and life make it our unique home.',stats:[['Sun Position','3rd Planet'],['Orbital Period','365 Days'],['Diameter','~12,742 km'],['Observation','Known to Host Life']],note:'Click on the 3D globe to hear a little secret.',voice:'I am Earth, the blue oasis where millions of wonderful species live!'},
+          moon:{num:'05',name:'Moon',sub:'THE EARTH COMPANION',desc:'Earth’s only natural satellite, permanently locked facing us with its ancient cratered highlands and lunar maria.',stats:[['Classification','Natural Satellite'],['Orbital Period','~27.3 Days'],['Diameter','~3,474 km'],['Observation','Tidally Locked']],note:'The dark and bright patches you see are lunar seas and crater highlands.',voice:'I am the Moon, watching over Earth quietly every single night!'},
+          mars:{num:'06',name:'Mars',sub:'THE RED FRONTIER',desc:'Its rich iron dust rusts and paints the landscape red. Active rovers are pioneering the search for ancient secrets.',stats:[['Sun Position','4th Planet'],['Orbital Period','687 Days'],['Diameter','~6,779 km'],['Observation','The Red Planet']],note:'Look at the rusty oxidized iron hue on its rugged terrain.',voice:'I am Mars! Maybe one day you will visit my red canyons and valleys!'},
+          ceres:{num:'07',name:'Ceres',sub:'THE ASTEROID QUEEN',desc:'The largest object in the asteroid belt, spherical in shape and dotted with bright, mysterious reflective salt spots.',stats:[['Classification','Dwarf Planet'],['Orbital Period','~4.6 Years'],['Diameter','~945 km'],['Region','Asteroid Belt']],note:'It is the gentle queen reigning over the rocky asteroid kingdom.',voice:'I am Ceres, the largest and roundest world in the asteroid belt!'},
+          jupiter:{num:'08',name:'Jupiter',sub:'THE GIANT',desc:'The gas giant undisputed king of planets. Its legendary Great Red Spot is a persistent super-storm wider than Earth.',stats:[['Sun Position','5th Planet'],['Orbital Period','~12 Years'],['Diameter','~139,820 km'],['Observation','Largest Planet']],note:'Spot the swirling storm known as the Great Red Spot.',voice:'I am Jupiter, big enough to fit over 1,300 Earths inside me!'},
+          saturn:{num:'09',name:'Saturn',sub:'THE RINGED WORLD',desc:'Adorned with spectacular rings composed of countless chunks of ice, rocks, and cosmic dust particles.',stats:[['Sun Position','6th Planet'],['Orbital Period','~29 Years'],['Diameter','~116,460 km'],['Observation','Ice-Particle Rings']],note:'Its majestic ring system is like the grandest hula hoop in the cosmos.',voice:'I am Saturn, surrounded by millions of glittering ice crystals!'},
+          uranus:{num:'10',name:'Uranus',sub:'THE SIDEWAYS ICE GIANT',desc:'A pale mint-cyan giant rolling sideways around the Sun, colored by atmospheric methane frost.',stats:[['Sun Position','7th Planet'],['Orbital Period','~84 Years'],['Diameter','~50,724 km'],['Observation','Rolling on Its Side']],note:'It rotates on its side, the most unusual posture in the solar system.',voice:'I am Uranus, rolling playfully along my orbit like an ice ball!'},
+          neptune:{num:'11',name:'Neptune',sub:'THE DEEP BLUE WIND',desc:'A distant world bathed in deep azure blue, harboring supersonic winds faster than the speed of sound.',stats:[['Sun Position','8th Planet'],['Orbital Period','~165 Years'],['Diameter','~49,244 km'],['Observation','Supersonic Winds']],note:'Winds here howl several times faster than high-speed bullet trains.',voice:'I am Neptune, far out in the cold with the fastest cosmic storms!'},
+          pluto:{num:'12',name:'Pluto',sub:'THE ICE HEART',desc:'Sporting its famous heart-shaped nitrogen glacier (Tombaugh Regio). The dark southern region represents real unmapped polar night.',stats:[['Classification','Dwarf Planet'],['Orbital Period','~248 Years'],['Diameter','~2,376 km'],['Observation','Real Polar Night Zone']],note:'The dark bottom is the genuine polar night shadow recorded by New Horizons!',voice:'I am Pluto, far away on the edge, carrying a heart-shaped glacier for humanity!'},
+          makemake:{num:'13',name:'Makemake',sub:'THE CRIMSON ICE',desc:'A bright, freezing dwarf planet in the Kuiper belt, cloaked in reddish-brown methane frost layers.',stats:[['Classification','Dwarf Planet'],['Orbital Period','~305 Years'],['Diameter','~1,430 km'],['Surface Temp','~ -243 °C']],note:'Named after the creator deity of Rapa Nui (Easter Island).',voice:'I am Makemake, shimmering with deep-frozen methane frost in deep space!'},
+          haumea:{num:'14',name:'Haumea',sub:'THE FAST SPINNER',desc:'The fastest-spinning large world in the solar system, elongated into an extraordinary cosmic rugby ball.',stats:[['Classification','Dwarf Planet'],['Rotation Period','~3.9 Hours'],['Mean Diameter','~1,595 km'],['Observation','Rapid Spin & Ice Crust']],note:'A full day here takes less than 4 hours to complete!',voice:'I am Haumea, spinning so fast that I stretched into an icy ellipsoid!'},
+          eris:{num:'15',name:'Eris',sub:'THE DISTANT GIANT',desc:'The most massive dwarf planet in the Kuiper Belt, permanently encased in a radiant white mantle of nitrogen-rich ice.',stats:[['Classification','Dwarf Planet'],['Orbital Period','~558 Years'],['Diameter','~2,326 km'],['Albedo','96% Reflective']],note:'Sunlight takes more than 9 hours to reach this frosty outpost.',voice:'I am Eris, silently exploring the deepest icy frontiers of our system!'}
+        }
+      }
+    };
+
+    const planetTextures = {
+      sun:      'assets/textures/2k_sun.jpg',
+      mercury:  'assets/textures/2k_mercury.jpg',
+      venus:    'assets/textures/2k_venus_atmosphere.jpg',
+      earth:    'assets/textures/2k_earth_daymap.jpg',
+      moon:     'assets/textures/2k_moon.jpg',
+      mars:     'assets/textures/2k_mars.jpg',
+      ceres:    'assets/textures/2k_ceres_fictional.jpg',
+      jupiter:  'assets/textures/2k_jupiter.jpg',
+      saturn:   'assets/textures/2k_saturn.jpg',
+      uranus:   'assets/textures/2k_uranus.jpg',
+      neptune:  'assets/textures/2k_neptune.jpg',
+      pluto:    'assets/textures/2K_Pluto_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.jpg',
+      makemake: 'assets/textures/2k_makemake_fictional.jpg',
+      haumea:   'assets/textures/2k_haumea_fictional.jpg',
+      eris:     'assets/textures/2k_eris_fictional.jpg'
+    };
+
+    function generateSaturnRingTexture() {
+      const img = new Image();
+      img.onload = () => {
+        const size = 1024;
+        const c = document.createElement('canvas');
+        c.width = size; c.height = size;
+        const ctx = c.getContext('2d');
+
+        const sC = document.createElement('canvas');
+        sC.width = img.width; sC.height = 1;
+        const sCtx = sC.getContext('2d');
+        sCtx.drawImage(img, 0, 0, img.width, 1);
+        const sData = sCtx.getImageData(0, 0, img.width, 1).data;
+
+        const out = ctx.createImageData(size, size);
+        const oD = out.data;
+        const cx = size / 2, cy = size / 2;
+        const rIn = size * 0.28, rOut = size * 0.49;
+
+        for (let y = 0; y < size; y++) {
+          for (let x = 0; x < size; x++) {
+            const dx = x - cx, dy = y - cy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const idx = (y * size + x) * 4;
+            if (dist >= rIn && dist <= rOut) {
+              const u = (dist - rIn) / (rOut - rIn);
+              const sx = Math.min(img.width - 1, Math.max(0, Math.floor(u * img.width)));
+              const sIdx = sx * 4;
+              oD[idx]     = sData[sIdx];
+              oD[idx + 1] = sData[sIdx + 1];
+              oD[idx + 2] = sData[sIdx + 2];
+              oD[idx + 3] = sData[sIdx + 3];
+            } else {
+              oD[idx + 3] = 0;
+            }
+          }
+        }
+        ctx.putImageData(out, 0, 0);
+        document.documentElement.style.setProperty('--ring-url', `url("${c.toDataURL()}")`);
+      };
+      img.src = 'assets/textures/2k_saturn_ring_alpha.png';
+    }
+    generateSaturnRingTexture();
+
+    // 全景星空生成器
+    let updateStarfieldParallax = () => {};
+    function initDeepStarfield(canvas) {
+      const ctx = canvas.getContext('2d');
+      let w = 0, h = 0;
+      let stars = [];
+      let offsetX = 0, offsetY = 0, zoomFactor = 1.0;
+
+      function createStarData() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+
+        let seed = 12345;
+        function rnd() {
+          seed = (seed * 9301 + 49297) % 233280;
+          return seed / 233280;
+        }
+
+        const starCount = Math.floor((w * h) / 8500);
+        const starColors = [
+          'rgba(255, 255, 255,',
+          'rgba(220, 235, 255,',
+          'rgba(185, 215, 255,',
+          'rgba(255, 230, 180,'
+        ];
+
+        stars = [];
+        for (let i = 0; i < starCount; i++) {
+          stars.push({
+            x: rnd() * w,
+            y: rnd() * h,
+            r: 0.35 + rnd() * 1.1,
+            depth: 0.2 + rnd() * 0.8,
+            alpha: 0.18 + rnd() * 0.7,
+            color: starColors[Math.floor(rnd() * starColors.length)],
+            isGlow: rnd() > 0.95
+          });
+        }
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = '#02050f';
+        ctx.fillRect(0, 0, w, h);
+
+        let nebX = w * 0.2 + offsetX * 0.08;
+        let nebY = h * 0.3 + offsetY * 0.08;
+        let nebula = ctx.createRadialGradient(nebX, nebY, 20, nebX, nebY, Math.min(w, h) * 0.65 * zoomFactor);
+        nebula.addColorStop(0, 'rgba(45, 18, 80, 0.26)');
+        nebula.addColorStop(1, 'transparent');
+        ctx.fillStyle = nebula;
+        ctx.fillRect(0, 0, w, h);
+
+        let neb2X = w * 0.8 + offsetX * 0.12;
+        let neb2Y = h * 0.7 + offsetY * 0.12;
+        let nebula2 = ctx.createRadialGradient(neb2X, neb2Y, 30, neb2X, neb2Y, Math.min(w, h) * 0.75 * zoomFactor);
+        nebula2.addColorStop(0, 'rgba(15, 45, 105, 0.28)');
+        nebula2.addColorStop(1, 'transparent');
+        ctx.fillStyle = nebula2;
+        ctx.fillRect(0, 0, w, h);
+
+        stars.forEach(s => {
+          let px = (s.x + offsetX * s.depth) % w;
+          if (px < 0) px += w;
+          let py = (s.y + offsetY * s.depth) % h;
+          if (py < 0) py += h;
+
+          ctx.beginPath();
+          ctx.fillStyle = s.color + s.alpha + ')';
+          ctx.arc(px, py, s.r * (0.85 + zoomFactor * 0.15), 0, Math.PI * 2);
+          ctx.fill();
+
+          if (s.isGlow) {
+            let glow = ctx.createRadialGradient(px, py, 0, px, py, s.r * 4.0);
+            glow.addColorStop(0, s.color + '0.45)');
+            glow.addColorStop(1, 'transparent');
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(px, py, s.r * 4.0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+      }
+
+      updateStarfieldParallax = (dx, dy, zf) => {
+        offsetX += dx;
+        offsetY += dy;
+        if (zf !== undefined) zoomFactor = zf;
+        render();
+      };
+
+      window.addEventListener('resize', () => {
+        createStarData();
+        render();
+      });
+      createStarData();
+      render();
+    }
+    initDeepStarfield(document.getElementById('orrery-bg-canvas'));
+
+    // WebGL 核心球体渲染器
+    function renderer(canvas, initialKey, onAngleUpdate) {
+      const gl = canvas.getContext('webgl', {alpha:true, antialias:true});
+      if(!gl) return { set(){}, drag(){return false} };
+
+      const vs = `
+        attribute vec3 p;
+        attribute vec2 uv;
+        attribute vec3 n;
+        uniform float y;
+        uniform float x;
+        varying vec3 N;
+        varying vec2 vUv;
+        vec3 ry(vec3 v,float a){float c=cos(a),s=sin(a);return vec3(c*v.x+s*v.z,v.y,-s*v.x+c*v.z);}
+        vec3 rx(vec3 v,float a){float c=cos(a),s=sin(a);return vec3(v.x,c*v.y-s*v.z,s*v.y+c*v.z);}
+        void main(){
+          vUv = uv;
+          vec3 P = rx(ry(p, y), x);
+          N = normalize(rx(ry(n, y), x));
+          gl_Position = vec4(P.xy, P.z * 0.17, 1.0);
+        }
+      `;
+
+      const fs = `
+        precision mediump float;
+        varying vec3 N;
+        varying vec2 vUv;
+        uniform sampler2D uTex;
+        uniform float uIsSun;
+        void main(){
+          vec4 texColor = texture2D(uTex, vUv);
+          if (uIsSun > 0.5) {
+            float edge = pow(1.0 - max(dot(normalize(N), vec3(0.0, 0.0, 1.0)), 0.0), 1.8);
+            vec3 sunCol = texColor.rgb * 1.15 + vec3(1.0, 0.5, 0.1) * edge * 0.85;
+            gl_FragColor = vec4(sunCol, 1.0);
+          } else {
+            vec3 lightDir = normalize(vec3(-0.75, 0.70, 0.95));
+            float diff = max(dot(normalize(N), lightDir), 0.0);
+            float shadow = 0.14 + 0.88 * pow(diff, 1.15);
+            float rim = pow(1.0 - max(dot(normalize(N), vec3(0.0, 0.0, 1.0)), 0.0), 3.0);
+            vec3 finalColor = texColor.rgb * shadow + texColor.rgb * rim * 0.45;
+            gl_FragColor = vec4(finalColor, 1.0);
+          }
+        }
+      `;
+
+      const sh = (t, s) => {
+        const q = gl.createShader(t); gl.shaderSource(q, s); gl.compileShader(q); return q;
+      };
+      const pr = gl.createProgram();
+      gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs));
+      gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs));
+      gl.linkProgram(pr);
+      gl.useProgram(pr);
+
+      let pos = [], uvs = [], normals = [], idx = [];
+      let la = 48, lo = 64;
+      for (let yy = 0; yy <= la; yy++) {
+        let th = yy / la * Math.PI;
+        for (let xx = 0; xx <= lo; xx++) {
+          let u = xx / lo;
+          let v = yy / la;
+          let ph = u * Math.PI * 2;
+          let X = Math.sin(th) * Math.cos(ph);
+          let Y = Math.cos(th);
+          let Z = Math.sin(th) * Math.sin(ph);
+          pos.push(X, Y, Z);
+          normals.push(X, Y, Z);
+          uvs.push(1.0 - u, v);
+        }
+      }
+      for (let yy = 0; yy < la; yy++) {
+        for (let xx = 0; xx < lo; xx++) {
+          let q = yy * (lo + 1) + xx;
+          let r = q + lo + 1;
+          idx.push(q, r, q + 1, r, r + 1, q + 1);
+        }
+      }
+
+      function createBuffer(data, name, size) {
+        let q = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, q);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+        let l = gl.getAttribLocation(pr, name);
+        gl.enableVertexAttribArray(l);
+        gl.vertexAttribPointer(l, size, gl.FLOAT, false, 0, 0);
+      }
+      createBuffer(pos, 'p', 3);
+      createBuffer(normals, 'n', 3);
+      createBuffer(uvs, 'uv', 2);
+
+      let ib = gl.createBuffer();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
+
+      gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.CULL_FACE);
+      gl.frontFace(gl.CW);
+
+      let L = {
+        y: gl.getUniformLocation(pr, 'y'),
+        x: gl.getUniformLocation(pr, 'x'),
+        uTex: gl.getUniformLocation(pr, 'uTex'),
+        uIsSun: gl.getUniformLocation(pr, 'uIsSun')
+      };
+
+      const textureCache = {};
+      function createGLTexture(src) {
+        if (textureCache[src]) return textureCache[src];
+        const tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([20, 35, 75, 255]));
+
+        const img = new Image();
+        img.onload = () => {
+          gl.bindTexture(gl.TEXTURE_2D, tex);
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        };
+        img.onerror = () => {
+          if (src.includes('Pluto') || src.includes('pluto')) {
+            img.src = 'assets/textures/2k_pluto.jpg';
+          } else if (src.includes('ceres') && !src.includes('2k_ceres.jpg')) {
+            img.src = 'assets/textures/2k_ceres.jpg';
+          }
+        };
+        img.src = src;
+        textureCache[src] = tex;
+        return tex;
+      }
+
+      let currentKey = initialKey || 'earth';
+      let activeTex = createGLTexture(planetTextures[currentKey]);
+      let Y = 0.65, X = -0.1, hold = false, lx = 0, ly = 0, moved = false;
+
+      function draw() {
+        if (currentMode === 'focus') {
+          let d = Math.min(devicePixelRatio || 1, 2);
+          let w = canvas.clientWidth * d, hh = canvas.clientHeight * d;
+          if (canvas.width !== w || canvas.height !== hh) {
+            canvas.width = w; canvas.height = hh;
+            gl.viewport(0, 0, w, hh);
+          }
+          if (!hold) Y += (currentKey === 'sun' ? 0.0018 : (currentKey === 'haumea' ? 0.0075 : 0.0032));
+          gl.clearColor(0, 0, 0, 0);
+          gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+          gl.useProgram(pr);
+          gl.uniform1f(L.y, Y);
+          gl.uniform1f(L.x, X);
+          gl.uniform1f(L.uIsSun, currentKey === 'sun' ? 1.0 : 0.0);
+
+          gl.activeTexture(gl.TEXTURE0);
+          gl.bindTexture(gl.TEXTURE_2D, activeTex);
+          gl.uniform1i(L.uTex, 0);
+
+          gl.drawElements(gl.TRIANGLES, idx.length, gl.UNSIGNED_SHORT, 0);
+          
+          if (onAngleUpdate) {
+            let degY = (Y * 180 / Math.PI) % 360;
+            if (degY < 0) degY += 360;
+            let degX = (X * 180 / Math.PI);
+            let currentDeg = Math.sqrt(degY * degY + degX * degX) % 360;
+            onAngleUpdate(currentDeg);
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+
+      canvas.addEventListener('pointerdown', e => {
+        hold = true; moved = false;
+        lx = e.clientX; ly = e.clientY;
+        canvas.setPointerCapture(e.pointerId);
+      });
+      canvas.addEventListener('pointermove', e => {
+        if (!hold) return;
+        let dx = e.clientX - lx, dy = e.clientY - ly;
+        if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+        Y += dx * 0.012;
+        X = Math.max(-1.1, Math.min(1.1, X + dy * 0.01));
+        lx = e.clientX; ly = e.clientY;
+      });
+      canvas.addEventListener('pointerup', () => {
+        hold = false;
+        setTimeout(() => moved = false, 0);
+      });
+
+      return {
+        set: key => {
+          if (planetTextures[key]) {
+            currentKey = key;
+            activeTex = createGLTexture(planetTextures[key]);
+          }
+        },
+        getY: () => Y,
+        setY: val => { Y = val; },
+        drag: () => moved
+      };
+    }
+
+    // 太阳系全景星图引擎 (Solar Orrery)
+    function initOrrery(canvas, onSelectPlanet) {
+      const ctx = canvas.getContext('2d');
+      let rotX = 1.15, rotZ = 0.2, zoom = 1.0;
+      let hold = false, lx = 0, ly = 0, moved = false;
+      let time = 0;
+
+      const celestialSystem = [
+        { key:'sun',      r: 0,   speed: 0,     size: 18, color: '#ffaa22', glow: '#ff6600', isSun: true },
+        { key:'mercury',  r: 46,  speed: 4.15,  size: 3.5, color: '#a2a39e', orbitColor: 'rgba(162,163,158,0.22)' },
+        { key:'venus',    r: 72,  speed: 1.62,  size: 5.5, color: '#e0a764', orbitColor: 'rgba(224,167,100,0.2)' },
+        { key:'earth',    r: 104, speed: 1.0,   size: 6.0, color: '#2787ce', orbitColor: 'rgba(39,135,206,0.28)', hasMoon: true },
+        { key:'mars',     r: 140, speed: 0.53,  size: 4.5, color: '#c7644d', orbitColor: 'rgba(199,100,77,0.22)' },
+        { key:'ceres',    r: 176, speed: 0.21,  size: 3.0, color: '#828792', orbitColor: 'rgba(130,135,146,0.25)', isBelt: true },
+        { key:'jupiter',  r: 235, speed: 0.084, size: 12.0,color: '#c38562', orbitColor: 'rgba(195,133,98,0.25)' },
+        { key:'saturn',   r: 295, speed: 0.034, size: 10.0,color: '#d3b168', orbitColor: 'rgba(211,177,104,0.25)', hasRing: true },
+        { key:'uranus',   r: 350, speed: 0.012, size: 7.0, color: '#7ad0d0', orbitColor: 'rgba(122,208,208,0.22)' },
+        { key:'neptune',  r: 405, speed: 0.006, size: 6.8, color: '#4165c9', orbitColor: 'rgba(65,101,201,0.25)' },
+        { key:'pluto',    r: 460, speed: 0.004, size: 3.0, color: '#c5a892', orbitColor: 'rgba(197,168,146,0.2)', isKuiper: true },
+        { key:'haumea',   r: 495, speed: 0.0035,size: 2.8, color: '#b2c5d8', orbitColor: 'rgba(178,197,216,0.18)', isKuiper: true },
+        { key:'makemake', r: 530, speed: 0.0032,size: 2.8, color: '#bf6a4b', orbitColor: 'rgba(191,106,75,0.18)', isKuiper: true },
+        { key:'eris',     r: 575, speed: 0.0018,size: 3.0, color: '#d2d6db', orbitColor: 'rgba(210,214,219,0.18)', isKuiper: true }
+      ];
+
+      let renderedBodies = [];
+
+      function project(x, y, z, cx, cy) {
+        let x1 = x * Math.cos(rotZ) - y * Math.sin(rotZ);
+        let y1 = x * Math.sin(rotZ) + y * Math.cos(rotZ);
+        let z1 = z;
+        let x2 = x1;
+        let y2 = y1 * Math.cos(rotX) - z1 * Math.sin(rotX);
+        let z2 = y1 * Math.sin(rotX) + z1 * Math.cos(rotX);
+        let scale = (zoom * 650) / (650 + z2 * 0.4);
+        return { px: cx + x2 * scale, py: cy + y2 * scale, scale: scale, depth: z2 };
+      }
+
+      function draw() {
+        if (currentMode === 'orrery') {
+          let d = Math.min(devicePixelRatio || 1, 2);
+          let w = canvas.clientWidth, h = canvas.clientHeight;
+          if (canvas.width !== w * d || canvas.height !== h * d) {
+            canvas.width = w * d;
+            canvas.height = h * d;
+            ctx.scale(d, d);
+          }
+
+          ctx.clearRect(0, 0, w, h);
+          let cx = w / 2, cy = h / 2 + 10;
+          time += 0.008;
+
+          ctx.save();
+          ctx.strokeStyle = 'rgba(180, 205, 255, 0.06)';
+          ctx.lineWidth = 14 * zoom;
+          ctx.beginPath();
+          for (let a = 0; a <= Math.PI * 2; a += 0.1) {
+            let p = project(Math.cos(a) * 176, Math.sin(a) * 176, 0, cx, cy);
+            if (a === 0) ctx.moveTo(p.px, p.py); else ctx.lineTo(p.px, p.py);
+          }
+          ctx.closePath();
+          ctx.stroke();
+          ctx.restore();
+
+          renderedBodies = [];
+
+          celestialSystem.forEach(b => {
+            if (b.r > 0) {
+              ctx.beginPath();
+              ctx.strokeStyle = b.orbitColor || 'rgba(180, 205, 255, 0.12)';
+              ctx.lineWidth = Math.max(0.8, 1 * b.orbitColor ? 1.2 : 0.8);
+              ctx.setLineDash(b.isBelt || b.isKuiper ? [3, 6] : []);
+              for (let a = 0; a <= Math.PI * 2; a += 0.08) {
+                let p = project(Math.cos(a) * b.r, Math.sin(a) * b.r, 0, cx, cy);
+                if (a === 0) ctx.moveTo(p.px, p.py); else ctx.lineTo(p.px, p.py);
+              }
+              ctx.closePath();
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
+          });
+
+          let bodiesToRender = [];
+          celestialSystem.forEach(b => {
+            let angle = b.speed * time + (b.r * 0.4);
+            let x = Math.cos(angle) * b.r, y = Math.sin(angle) * b.r;
+            let p = project(x, y, 0, cx, cy);
+            bodiesToRender.push({ ...b, px: p.px, py: p.py, scale: p.scale, depth: p.depth });
+
+            if (b.hasMoon) {
+              let mAngle = time * 8.5;
+              let mx = x + Math.cos(mAngle) * 16, my = y + Math.sin(mAngle) * 16;
+              let mp = project(mx, my, 0, cx, cy);
+              bodiesToRender.push({
+                key: 'moon', r: b.r, px: mp.px, py: mp.py, scale: mp.scale, depth: mp.depth + 1,
+                size: 2.2, color: '#c8ccd4', isMoon: true
+              });
+            }
+          });
+
+          bodiesToRender.sort((a, b) => b.depth - a.depth);
+
+          bodiesToRender.forEach(b => {
+            let rad = Math.max(2, b.size * b.scale * 0.8);
+            if (b.isSun) {
+              let grad = ctx.createRadialGradient(b.px, b.py, rad * 0.4, b.px, b.py, rad * 3.5);
+              grad.addColorStop(0, 'rgba(255, 210, 80, 1)');
+              grad.addColorStop(0.3, 'rgba(255, 120, 20, 0.6)');
+              grad.addColorStop(1, 'rgba(255, 60, 0, 0)');
+              ctx.fillStyle = grad;
+              ctx.beginPath();
+              ctx.arc(b.px, b.py, rad * 3.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            ctx.fillStyle = b.color;
+            ctx.beginPath();
+            ctx.arc(b.px, b.py, rad, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (b.hasRing) {
+              ctx.save();
+              ctx.strokeStyle = 'rgba(225, 195, 130, 0.75)';
+              ctx.lineWidth = 3.5 * b.scale;
+              ctx.beginPath();
+              ctx.ellipse(b.px, b.py, rad * 2.4, rad * 0.9, -0.3, 0, Math.PI * 2);
+              ctx.stroke();
+              ctx.restore();
+            }
+
+            let name = i18n[currentLang].planets[b.key] || b.key;
+            ctx.fillStyle = (b.key === current ? '#ffd36b' : 'rgba(220, 235, 255, 0.85)');
+            ctx.font = `${Math.max(10, Math.floor(11 * zoom))}px "PingFang SC","Microsoft YaHei",sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(name, b.px, b.py - rad - 6);
+
+            renderedBodies.push({
+              key: b.key, x: b.px, y: b.py, radius: Math.max(12, rad * 1.6)
+            });
+          });
+        }
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+
+      canvas.addEventListener('pointerdown', e => {
+        hold = true; moved = false;
+        lx = e.clientX; ly = e.clientY;
+        canvas.setPointerCapture(e.pointerId);
+      });
+      canvas.addEventListener('pointermove', e => {
+        if (!hold) return;
+        let dx = e.clientX - lx, dy = e.clientY - ly;
+        if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+        rotZ += dx * 0.005;
+        rotX = Math.max(0.4, Math.min(1.45, rotX + dy * 0.004));
+
+        updateStarfieldParallax(dx * 0.45, dy * 0.45, zoom);
+        lx = e.clientX; ly = e.clientY;
+      });
+      canvas.addEventListener('pointerup', e => {
+        hold = false;
+        if (!moved) {
+          let rect = canvas.getBoundingClientRect();
+          let clickX = e.clientX - rect.left;
+          let clickY = e.clientY - rect.top;
+          for (let b of renderedBodies) {
+            if (Math.hypot(clickX - b.x, clickY - b.y) <= b.radius) {
+              onSelectPlanet(b.key);
+              break;
+            }
+          }
+        }
+      });
+      canvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        zoom = Math.max(0.65, Math.min(1.85, zoom - e.deltaY * 0.0012));
+        updateStarfieldParallax(0, 0, zoom);
+      }, { passive: false });
+    }
+
+    const $ = id => document.getElementById(id);
+
+    let lastDeg = 42.6;
+    function updateViewpointAngle(deg) {
+      lastDeg = deg;
+      const t = i18n[currentLang];
+      $('viewpoint-text').textContent = `${t.viewpointPrefix} ${deg.toFixed(1)}°`;
+    }
+
+    let current = 'earth', timer;
+    const draw = renderer(document.getElementById('planet-canvas'), current, updateViewpointAngle);
+    const exitDraw = renderer(document.getElementById('departing-canvas'), current, null);
+
+    initOrrery(document.getElementById('orrery-canvas'), key => {
+      choose(key);
+      toggleViewMode('focus');
+    });
+
+    function toggleViewMode(targetMode) {
+      currentMode = targetMode || (currentMode === 'focus' ? 'orrery' : 'focus');
+      const isOrrery = currentMode === 'orrery';
+
+      $('experience').classList.toggle('is-orrery', isOrrery);
+      $('orrery-scene').classList.toggle('active', isOrrery);
+      $('focus-scene').style.display = isOrrery ? 'none' : 'grid';
+      
+      $('bottom-selector').classList.toggle('hide-in-orrery', isOrrery);
+
+      const t = i18n[currentLang];
+      $('view-text').textContent = isOrrery ? t.viewBtnFocus : t.viewBtnOrrery;
+      $('view-icon-wrap').innerHTML = isOrrery ? svgIcons.focus : svgIcons.orrery;
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const t = i18n[lang];
+      const d = t.records[current];
+
+      document.documentElement.lang = lang;
+      $('lang-zh').classList.toggle('active', lang === 'zh');
+      $('lang-en').classList.toggle('active', lang === 'en');
+
+      $('brand-title').textContent = t.brand;
+      $('visitor-label').textContent = t.visitorLabel;
+      $('visitor-count').textContent = visitorNumber.toLocaleString();
+
+      $('view-text').textContent = currentMode === 'orrery' ? t.viewBtnFocus : t.viewBtnOrrery;
+      $('caption-line1').textContent = t.caption1;
+      $('caption-line2').textContent = t.caption2;
+      $('range-label').textContent = t.range;
+      $('viewpoint-text').textContent = `${t.viewpointPrefix} ${lastDeg.toFixed(1)}°`;
+
+      $('orrery-hud-badge').textContent = t.orreryBadge;
+      $('orrery-hud-title').textContent = t.orreryTitle;
+      $('orrery-hud-desc').textContent = t.orreryDesc;
+
+      $('archive-label').textContent = `${t.archivePrefix} ${d.num} / 15`;
+      $('planet-name').childNodes[0].nodeValue = d.name;
+      $('planet-subtitle').textContent = d.sub;
+      $('planet-description').textContent = d.desc;
+      [['p1-label','p1-value'],['p2-label','p2-value'],['p3-label','p3-value'],['p4-label','p4-value']].forEach((ids, n) => {
+        $(ids[0]).textContent = d.stats[n][0];
+        $(ids[1]).textContent = d.stats[n][1];
+      });
+      $('archive-note').lastChild.textContent = d.note;
+
+      document.querySelectorAll('.planet-select').forEach(btn => {
+        const k = btn.dataset.key;
+        btn.querySelector('span').textContent = t.planets[k] || k;
+      });
+    }
+
+    function choose(key) {
+      if (key === current) return;
+      current = key;
+      
+      const departing = $('departing-carrier');
+      const carrier = $('planet-carrier');
+      const archive = $('archive-section');
+      const t = i18n[currentLang];
+      const d = t.records[key];
+
+      // 切换当前天体自适应环境光晕
+      const ambient = planetAmbientColors[key] || planetAmbientColors.earth;
+      document.documentElement.style.setProperty('--ambient-glow', ambient.glow);
+      document.documentElement.style.setProperty('--ambient-core', ambient.core);
+
+      exitDraw.setY(draw.getY());
+
+      archive.classList.add('switching');
+      setTimeout(() => {
+        $('archive-label').textContent = `${t.archivePrefix} ${d.num} / 15`;
+        $('planet-name').childNodes[0].nodeValue = d.name;
+        $('planet-subtitle').textContent = d.sub;
+        $('planet-description').textContent = d.desc;
+        [['p1-label','p1-value'],['p2-label','p2-value'],['p3-label','p3-value'],['p4-label','p4-value']].forEach((ids, n) => {
+          $(ids[0]).textContent = d.stats[n][0];
+          $(ids[1]).textContent = d.stats[n][1];
+        });
+        $('archive-note').lastChild.textContent = d.note;
+        $('range-value').textContent = d.stats[2][1].replace(/^(约|~)\s*/, '').replace(/^(直径|Diameter|平均直径|Mean Diameter)\s*/, '');
+        archive.classList.remove('switching');
+      }, 160);
+
+      exitDraw.set(key);
+      departing.className = 'planet-carrier departing-carrier';
+      void departing.offsetWidth;
+      departing.classList.toggle('has-ring', current === 'saturn');
+      departing.classList.toggle('is-sun', current === 'sun');
+      departing.classList.add('shrink-out');
+
+      carrier.className = 'planet-carrier';
+      void carrier.offsetWidth;
+      carrier.classList.toggle('has-ring', key === 'saturn');
+      carrier.classList.toggle('is-sun', key === 'sun');
+      carrier.classList.add('focus-in');
+      draw.set(key);
+
+      $('planet-hit').setAttribute('aria-label', `${d.name} 3D Model`);
+      document.querySelectorAll('.planet-select').forEach(b => {
+        let on = b.dataset.key === key;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', on);
+      });
+
+      // 仅在横向列表内部居中滚动，绝不撑大外层页面
+      const planetList = $('planet-list');
+      const activeBtn = document.querySelector(`.planet-select[data-key="${key}"]`);
+      if (planetList && activeBtn) {
+        const offsetLeft = activeBtn.offsetLeft - planetList.offsetWidth / 2 + activeBtn.offsetWidth / 2;
+        planetList.scrollTo({ left: offsetLeft, behavior: 'smooth' });
+      }
+    }
+
+    function navigatePlanet(step) {
+      let idx = planetOrder.indexOf(current);
+      if (idx === -1) idx = 3;
+      let nextIdx = (idx + step + planetOrder.length) % planetOrder.length;
+      choose(planetOrder[nextIdx]);
+    }
+
+    function speak() {
+      const d = i18n[currentLang].records[current];
+      $('toast').textContent = `${d.name}: "${d.voice}"`;
+      $('toast').classList.add('show');
+      clearTimeout(timer);
+      timer = setTimeout(() => $('toast').classList.remove('show'), 4400);
+    }
+
+    async function initVisitorCounter() {
+      const NAMESPACE = 'cosmic_planet_station_2026';
+      const KEY = 'explorers_count';
+      const BASE_OFFSET = 12800;
+
+      const countEl = $('visitor-count');
+      const LAST_VISIT_KEY = 'cosmic_station_last_visited';
+      const now = Date.now();
+      const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+      const lastVisit = localStorage.getItem(LAST_VISIT_KEY);
+
+      try {
+        let apiUrl = '';
+        if (!lastVisit || (now - parseInt(lastVisit)) > ONE_DAY_MS) {
+          apiUrl = `https://api.counterapi.dev/v1/${NAMESPACE}/${KEY}/up`;
+          localStorage.setItem(LAST_VISIT_KEY, now.toString());
+        } else {
+          apiUrl = `https://api.counterapi.dev/v1/${NAMESPACE}/${KEY}`;
+        }
+
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        
+        if (data && typeof data.count === 'number') {
+          visitorNumber = BASE_OFFSET + data.count;
+        }
+      } catch (err) {
+        const daysPassed = Math.floor((now - new Date('2026-01-01').getTime()) / ONE_DAY_MS);
+        visitorNumber = BASE_OFFSET + daysPassed * 18;
+      }
+
+      if (countEl) {
+        countEl.textContent = visitorNumber.toLocaleString();
+      }
+    }
+    initVisitorCounter();
+
+    $('lang-btn').addEventListener('click', () => {
+      applyLanguage(currentLang === 'zh' ? 'en' : 'zh');
+    });
+
+    $('view-mode-btn').addEventListener('click', () => toggleViewMode());
+
+    // 键盘隐藏快捷操作：T 切语言，Space 切全景，← / → 左右切天体
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 't' || e.key === 'T') {
+        applyLanguage(currentLang === 'zh' ? 'en' : 'zh');
+      } else if (e.code === 'Space') {
+        e.preventDefault();
+        toggleViewMode();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (currentMode === 'focus') navigatePlanet(-1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (currentMode === 'focus') navigatePlanet(1);
+      }
+    });
+
+    document.querySelectorAll('.planet-select').forEach(b => b.addEventListener('click', () => choose(b.dataset.key)));
+    $('planet-hit').addEventListener('click', () => { if (!draw.drag()) speak(); });
+
+    // 初始化默认英文展示
+    applyLanguage('en');
+  </script>
+</body>
+</html>
