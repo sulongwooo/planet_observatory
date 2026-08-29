@@ -1386,6 +1386,19 @@
     }
     initVisitorCounter();
 
+    // 页面加载完成后后台预加载全部天体纹理，切换星球时无需等待下载
+    function preloadAllTextures() {
+      const urls = new Set();
+      Object.values(planetTextures).forEach(u => urls.add(u));
+      Object.values(planetNightTextures).forEach(u => urls.add(u));
+      urls.forEach(u => { const img = new Image(); img.src = u; });
+    }
+    if (document.readyState === 'complete') {
+      setTimeout(preloadAllTextures, 400);
+    } else {
+      window.addEventListener('load', () => setTimeout(preloadAllTextures, 400));
+    }
+
     $('lang-btn').addEventListener('click', () => {
       applyLanguage(currentLang === 'zh' ? 'en' : 'zh');
     });
