@@ -1353,13 +1353,18 @@
         speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(d.voice);
         u.lang = currentLang === 'zh' ? 'zh-CN' : 'en-US';
-        u.rate = 0.95;
-        u.pitch = 1.12;
+        u.rate = 0.9;      // 稍慢，方便小朋友听清
+        u.pitch = 1.18;    // 略高，更童趣俏皮
         const voices = speechSynthesis.getVoices();
         const langPrefix = u.lang.split('-')[0];
-        const preferred = voices.find(v =>
-          v.lang.toLowerCase().startsWith(langPrefix) && v.localService !== false
-        ) || voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
+        const exact = voices.filter(v => v.lang.toLowerCase() === u.lang.toLowerCase());
+        const prefix = voices.filter(v => v.lang.toLowerCase().startsWith(langPrefix));
+        // 优先同语言本地音色，其次同语言任意音色，保证稳定自然
+        const preferred =
+          exact.find(v => v.localService !== false) ||
+          exact[0] ||
+          prefix.find(v => v.localService !== false) ||
+          prefix[0];
         if (preferred) u.voice = preferred;
         speechSynthesis.speak(u);
       }
