@@ -1347,6 +1347,22 @@
       $('toast').classList.add('show');
       clearTimeout(timer);
       timer = setTimeout(() => $('toast').classList.remove('show'), 4400);
+
+      // 语音彩蛋：用浏览器语音合成朗读当前天体的台词
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(d.voice);
+        u.lang = currentLang === 'zh' ? 'zh-CN' : 'en-US';
+        u.rate = 0.95;
+        u.pitch = 1.12;
+        const voices = speechSynthesis.getVoices();
+        const langPrefix = u.lang.split('-')[0];
+        const preferred = voices.find(v =>
+          v.lang.toLowerCase().startsWith(langPrefix) && v.localService !== false
+        ) || voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
+        if (preferred) u.voice = preferred;
+        speechSynthesis.speak(u);
+      }
     }
 
     async function initVisitorCounter() {
@@ -1385,6 +1401,12 @@
       }
     }
     initVisitorCounter();
+
+    // 预热语音合成音色列表，确保首次点击星球即可选出合适音色
+    if ('speechSynthesis' in window) {
+      speechSynthesis.getVoices();
+      speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    }
 
     // 页面加载完成后后台预加载全部天体纹理，切换星球时无需等待下载
     // 采用空闲调度 + 低优先级 + 逐个间隔加载，避免抢占首屏带宽
