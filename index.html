@@ -259,14 +259,13 @@
     }
     
     /* 渐入渐出平滑动画 */
-    .planet-carrier.focus-in { animation: planet-focus-in 0.78s cubic-bezier(0.14, 1, 0.34, 1) both; }
+    .planet-carrier.focus-in { animation: planet-focus-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .departing-carrier { position:absolute; z-index:1; opacity:0; pointer-events:none; }
     .departing-carrier.fade-out { animation: planet-fade-out 0.25s ease both; }
     
     @keyframes planet-focus-in {
-      0% { opacity: 0; transform: scale(0.4); filter: brightness(1.28) blur(6px); }
-      70% { transform: scale(1.03); filter: brightness(1.08) blur(0px); }
-      100% { opacity: 1; transform: scale(1); filter: brightness(1) blur(0px); }
+      0% { opacity: 0; transform: scale(0.72) translateY(16px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
     @keyframes planet-fade-out {
       0% { opacity: 1; }
