@@ -1353,16 +1353,19 @@
         speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(d.voice);
         u.lang = currentLang === 'zh' ? 'zh-CN' : 'en-US';
-        u.rate = 0.9;      // 稍慢，方便小朋友听清
-        u.pitch = 1.18;    // 略高，更童趣俏皮
+        u.rate = 0.85;      // 放慢语速，像小朋友慢慢说
+        u.pitch = 1.38;     // 明显提高音调，接近天真童声
         const voices = speechSynthesis.getVoices();
         const langPrefix = u.lang.split('-')[0];
         const exact = voices.filter(v => v.lang.toLowerCase() === u.lang.toLowerCase());
         const prefix = voices.filter(v => v.lang.toLowerCase().startsWith(langPrefix));
-        // 优先同语言本地音色，其次同语言任意音色，保证稳定自然
+        // 优先挑选声线偏高、听感年轻可爱的音色，找不到再回退
+        const cute = /xiaoyi|xiaoxiao|samantha|ting-ting|meijia|sinji|jenny|aria|ana|zira|ava|michelle|karen|moira|fiona|tessa|veena|susan|joanna|nicky|lili|alloy/i;
         const preferred =
+          exact.find(v => v.localService !== false && cute.test(v.name)) ||
           exact.find(v => v.localService !== false) ||
           exact[0] ||
+          prefix.find(v => v.localService !== false && cute.test(v.name)) ||
           prefix.find(v => v.localService !== false) ||
           prefix[0];
         if (preferred) u.voice = preferred;
