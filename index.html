@@ -261,16 +261,16 @@
     /* 渐入渐出平滑动画 */
     .planet-carrier.focus-in { animation: planet-focus-in 0.78s cubic-bezier(0.14, 1, 0.34, 1) both; }
     .departing-carrier { position:absolute; z-index:1; opacity:0; pointer-events:none; }
-    .departing-carrier.shrink-out { animation: planet-shrink-out 0.38s cubic-bezier(0.4, 0, 1, 1) both; }
+    .departing-carrier.fade-out { animation: planet-fade-out 0.25s ease both; }
     
     @keyframes planet-focus-in {
       0% { opacity: 0; transform: scale(0.4); filter: brightness(1.28) blur(6px); }
       70% { transform: scale(1.03); filter: brightness(1.08) blur(0px); }
       100% { opacity: 1; transform: scale(1); filter: brightness(1) blur(0px); }
     }
-    @keyframes planet-shrink-out {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0.65); }
+    @keyframes planet-fade-out {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
     }
 
     .planet-hit { width:100%; height:100%; border:0; border-radius:50%; padding:0; position:relative; z-index:2; background:transparent; }
@@ -1310,7 +1310,7 @@
       void departing.offsetWidth;
       departing.classList.toggle('has-ring', prevKey === 'saturn');
       departing.classList.toggle('is-sun', prevKey === 'sun');
-      departing.classList.add('shrink-out');
+      departing.classList.add('fade-out');
 
       carrier.className = 'planet-carrier';
       void carrier.offsetWidth;
