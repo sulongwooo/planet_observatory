@@ -96,12 +96,19 @@ Double-click `index.html`. Everything works without a server; only the visitor c
 planet_observatory/
 ├── index.html              # Markup, styles and all client logic
 ├── server.py               # Local hosting + visitor statistics (SQLite)
+├── favicon.svg             # Browser tab icon
+├── LICENSE                 # MIT license text
 ├── assets/
-│   ├── readme/             # README screenshots
+│   ├── readme/             # README and social-preview images
 │   └── textures/           # Texture maps for 15 bodies and the star field
 └── data/                   # Local visit database (created at runtime, git-ignored)
 ```
 
+## Credits
+
+- Planet and star texture maps are based on the [Solar System Scope texture set](https://www.solarsystemscope.com/textures/), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The Pluto mosaic comes from NASA's New Horizons mission (NASA / JHUAPL / SwRI).
+- Orbital periods, diameters and classifications follow NASA planetary fact sheets and JPL Solar System Dynamics data.
+
 ## License
 
-MIT License © 2026
+MIT License © 2026. See [LICENSE](LICENSE).
