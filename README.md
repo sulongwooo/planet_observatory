@@ -36,18 +36,20 @@
 
 ## 快速开始
 
-**方式一：本地 HTTP 服务器（推荐）**
+**方式一：本地服务（推荐，带真实访客统计）**
 
 ```bash
 cd planet_observatory
-python3 -m http.server 8123
+python3 server.py
 ```
 
 浏览器打开 <http://localhost:8123>
 
+访问记录会写入本地 `data/visits.db`：同一个浏览器（设备）24 小时内只计 1 次，刷新不会重复计数；换浏览器或设备会被独立计入。展示值 = 初始基数 1,280 + 真实累计访客数，基数可在 `server.py` 的 `INITIAL_VISITORS` 中调整。
+
 **方式二：直接双击**
 
-直接双击 `index.html` 即可运行（访客计数接口不可用时，页面会自动使用本地兜底数值，不影响体验）。
+直接双击 `index.html` 即可运行。没有统计服务时，页面显示“初始基数 + 这台浏览器自己的到访天数”，不会出现所有浏览器都一样的固定假数字。
 
 ## 操作指南
 
@@ -69,6 +71,7 @@ python3 -m http.server 8123
 ```
 planet_observatory/
 ├── index.html              # 页面主体（含全部样式与逻辑，单文件）
+├── server.py               # 本地预览 + 访客统计服务（数据写入 data/visits.db）
 └── assets/
     └── textures/           # 15 颗天体及星空背景纹理贴图
 ```
