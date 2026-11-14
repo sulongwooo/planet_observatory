@@ -1,79 +1,105 @@
-# Deep Space Observatory · 深空星球观测站
+# Deep Space Observatory
 
-一个给孩子的太阳系互动科普站点。不用安装、不用注册、不用懂任何设置——**打开网页，就能把整个太阳系握在手里。**
+**An interactive 3D solar system for curious kids. No install, no account, no setup — open the page and hold the solar system in your hands.**
 
-在线体验：<https://sulongwooo.github.io/planet_observatory/>
+[Launch the live site](https://sulongwooo.github.io/planet_observatory/) · [Run it locally](#run-it-locally)
+
+![Close-up view of Earth in Deep Space Observatory](assets/readme/earth-closeup.png)
 
 ---
 
-## 打开这个页面，你会看到什么？
+## What you can do
 
-一进入页面，一颗 3D 地球正悬浮在深邃的星空中缓缓自转。接下来你可以：
+- **Drag a planet** to inspect it from any angle, like holding a real planetary model.
+- **Pick any of 15 bodies** from the bottom strip: the Sun, Mercury, Venus, Earth, the Moon, Mars, Ceres, Jupiter, Saturn, Uranus, Neptune, Pluto, Makemake, Haumea and Eris.
+- **Press `Space`** to enter the solar-system panorama, where every orbit runs silently around the Sun. Drag to look down on the ecliptic plane; scroll to zoom in.
+- **Click the globe** to hear the body tell you a little secret.
+- **Press `T`** to switch between English and Chinese at any time.
 
-- **拖动星球**，从任意角度观察它，像把玩一颗真实的行星模型
-- **点击底部天体栏**，在太阳、月球、土星、冥王星等 15 颗天体之间自由切换
-- **按下空格键**，切换到「太阳系全景」——所有行星在轨道上无声地运行，拖拽俯瞰黄道面，滚轮拉近细看
-- **点一下星球本体**，听它「亲口」讲一个小秘密
-- **按 T 键**，随时切换中英文
+## Two ways to explore
 
-## 它想解决什么问题？
+### Close-up observation
 
-太空离孩子很远，课本上的行星常常只是一个名字加一张照片：
+A high-resolution 3D globe fills the right side of the screen while its archive card — classification, orbital period, diameter and one memorable fact — sits on the left. Planets use real texture maps; a few dwarf planets use illustrative textures. Saturn's rings, Jupiter's Great Red Spot and Pluto's polar night are all rendered in place.
 
-- **「行星到底怎么绕着太阳转？」** ——全景模式把抽象的公转轨道变成一眼能看懂的动态星图
-- **「行星长什么样？」** ——每颗天体都使用高清纹理贴图，可以 360° 拖动，比静态图片直观得多
-- **「直径、轨道周期这些数据好无聊」** ——每颗天体配有专属档案卡片和童趣语音彩蛋，把冰冷的数字变成听得懂的小秘密
+### Solar system panorama
 
-如果你在给孩子找高质量的太空科普内容，又不想让 TA 接触复杂的软件或广告，这里打开即用、零依赖、免费开源。
+![Solar system panorama with planetary orbits](assets/readme/orrery.png)
 
-## 功能一览
+The panorama is a procedurally drawn orrery, not a video. All 15 bodies move along their orbits, labels stay readable at any zoom, and clicking a planet jumps straight back to its close-up archive.
 
-- 特写观测模式：WebGL 渲染的高清 3D 星球，支持拖拽旋转与逐星切换
-- 太阳系全景模式：程序化星图引擎，俯瞰公转轨道，点击任意天体直接对焦
-- 15 份天体档案：专属分类、轨道周期、直径数据 + 语音彩蛋
-- 中英双语：一键切换，全部文案实时翻译
-- 细节还原：土星冰晶光环、木星大红斑、冥王星真实极夜盲区等
+## Why it exists
 
-## 快速开始
+Space is far away, and most planet lessons reduce a world to a name and a photo:
 
-**方式一：本地服务（推荐，带真实访客统计）**
+- **"How do the planets actually orbit the Sun?"** — the panorama turns an abstract diagram into a moving sky map you can rotate and zoom.
+- **"What does a planet really look like?"** — each body is a 360° object you can drag, not a flat picture.
+- **"Diameter and orbital period are boring."** — every archive card pairs the numbers with a short, kid-friendly spoken secret.
+
+It is made for parents and teachers who want high-quality space content without ads, accounts, installers or a build step.
+
+## Features
+
+- WebGL close-up viewer with drag-to-rotate and smooth transitions between bodies
+- Procedural solar-system panorama with click-to-focus navigation
+- 15 archive cards with classification, orbital data, diameter and observation notes
+- Saturn ring geometry, Jupiter's Great Red Spot and Pluto's polar-night shading
+- Full English / Chinese interface, switchable at runtime
+- Keyboard and pointer controls; responsive layout down to tablets
+- Optional real visitor counter backed by a local SQLite database
+
+## Controls
+
+| Action | What it does |
+| --- | --- |
+| Click a body in the bottom strip | Switch the observation target |
+| Drag the 3D globe | Rotate the viewpoint |
+| Click the globe itself | Play the body's spoken secret |
+| `Space` | Toggle close-up / solar-system panorama |
+| `T` | Toggle English / Chinese |
+| `←` / `→` | Previous / next body |
+
+## Run it locally
+
+### Option 1 — local server (recommended, with visitor statistics)
 
 ```bash
 cd planet_observatory
 python3 server.py
 ```
 
-浏览器打开 <http://localhost:8123>
+Open <http://localhost:8123>.
 
-访问记录会写入本地 `data/visits.db`：同一个浏览器（设备）24 小时内只计 1 次，刷新不会重复计数；换浏览器或设备会被独立计入。展示值 = 初始基数 1,280 + 真实累计访客数，基数可在 `server.py` 的 `INITIAL_VISITORS` 中调整。
+The server uses only the Python standard library. Visits are stored in `data/visits.db` (SQLite, git-ignored), and the header badge shows the real cumulative visitor count.
 
-**方式二：直接双击**
+### Option 2 — just open the file
 
-直接双击 `index.html` 即可运行。没有统计服务时，页面显示“初始基数 + 这台浏览器自己的到访天数”，不会出现所有浏览器都一样的固定假数字。
+Double-click `index.html`. Everything works without a server; only the visitor counter falls back to a local, per-browser record.
 
-## 操作指南
+## How the visitor counter works
 
-| 操作 | 功能 |
-| --- | --- |
-| 点击底部天体 | 切换观测目标 |
-| 拖动 3D 星球 | 旋转视角 |
-| 点击星球本体 | 播放天体语音彩蛋 |
-| `Space` | 切换「特写观测 / 星系全景」 |
-| `T` | 中英文切换 |
-| `←` / `→` | 切换上一个 / 下一个天体 |
+- A visit is recorded once per browser/device per 24 hours; refreshing the page does not add another.
+- A different browser or device is counted separately, so the number grows from real visits.
+- The displayed value is `initial base + distinct visitors`. The base is `INITIAL_VISITORS` in `server.py` (default `1,280`), easy to change.
+- Without the local server — for example on GitHub Pages — the badge shows the base plus the number of days this browser has visited. It never shows one hard-coded number for every visitor.
 
-## 技术栈
+## Tech stack
 
-纯原生 WebGL + Canvas 2D，无框架、无构建工具、无外部依赖——一个 `index.html` 承载全部样式与逻辑。
+- Native WebGL and Canvas 2D rendering
+- No framework, no build step, no third-party runtime dependency
+- One `index.html` holds all markup, styles and logic
+- `server.py` (Python standard library + SQLite) provides local hosting and statistics
 
-## 项目结构
+## Project structure
 
 ```
 planet_observatory/
-├── index.html              # 页面主体（含全部样式与逻辑，单文件）
-├── server.py               # 本地预览 + 访客统计服务（数据写入 data/visits.db）
-└── assets/
-    └── textures/           # 15 颗天体及星空背景纹理贴图
+├── index.html              # Markup, styles and all client logic
+├── server.py               # Local hosting + visitor statistics (SQLite)
+├── assets/
+│   ├── readme/             # README screenshots
+│   └── textures/           # Texture maps for 15 bodies and the star field
+└── data/                   # Local visit database (created at runtime, git-ignored)
 ```
 
 ## License
